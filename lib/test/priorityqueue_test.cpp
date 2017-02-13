@@ -1,12 +1,29 @@
-#include <PriorityQueue.h>
+#include <BinaryHeap.h>
 
 #include <gtest/gtest.h>
 
-TEST(pqTest, test42)
+template<typename T>
+class PQTest : public ::testing::Test
 {
-	PriorityQueue pq;
-	ASSERT_EQ(42, pq.test());
+public:
+
+};
+
+TYPED_TEST_CASE_P(PQTest);
+
+TYPED_TEST_P(PQTest, testSize)
+{
+	PriorityQueue<int>* pq = new TypeParam();
+
+	ASSERT_EQ(0, pq->size());
+
+	delete pq;
 }
+
+REGISTER_TYPED_TEST_CASE_P(PQTest, testSize);
+
+typedef ::testing::Types<BinaryHeap<int>> pqTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(Bla, PQTest, pqTypes);
 
 int main(int argc, char** argv)
 {
