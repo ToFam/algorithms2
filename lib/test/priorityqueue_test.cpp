@@ -1,4 +1,5 @@
 #include <BinaryHeap.h>
+#include <PairingHeap.h>
 
 #include <gtest/gtest.h>
 
@@ -104,7 +105,7 @@ TYPED_TEST_P(PQTest, testDel)
 
 REGISTER_TYPED_TEST_CASE_P(PQTest, testEmpty, testAdd, testMin, testDel);
 
-typedef ::testing::Types<BinaryHeap<int>> pqTypes;
+typedef ::testing::Types<BinaryHeap<int>, PairingHeap<int>> pqTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Bla, PQTest, pqTypes);
 
 int main(int argc, char** argv)

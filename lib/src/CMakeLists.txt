@@ -2,6 +2,8 @@ SET (HEADER_PATH ${algorithms2_SOURCE_DIR}/lib/include)
 SET (TARGET_H
 		${HEADER_PATH}/PriorityQueue.h
 		${HEADER_PATH}/BinaryHeap.h
+                ${HEADER_PATH}/AdressablePQ.h
+                ${HEADER_PATH}/PairingHeap.h
 		
 		${HEADER_PATH}/Lib.h
 )
