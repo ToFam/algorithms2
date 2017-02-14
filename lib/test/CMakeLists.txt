@@ -1,4 +1,4 @@
-find_package (Gtest REQUIRED)
+find_package (GTest REQUIRED)
 enable_testing()
 
 include_directories (${algorithms2_SOURCE_DIR}/lib/include
