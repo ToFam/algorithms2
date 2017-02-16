@@ -32,6 +32,6 @@ class PriorityQueue
 public:
     virtual void insert(PQElement<T> e) = 0;
 	virtual size_t size() const = 0;
-    virtual PQElement<T> min() = 0;
+    virtual PQElement<T> min() const = 0;
     virtual PQElement<T> deleteMin() = 0;
 };

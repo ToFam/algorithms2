@@ -6,12 +6,12 @@ template <typename T>
 class AdressablePQ : public PriorityQueue<T>
 {
 public:
-    virtual T remove(T handle) = 0;
+    virtual PQElement<T> remove(T handle) = 0;
     virtual void decreaseKey(T handle, int key) = 0;
 
     void merge(AdressablePQ<T>* other)
     {
-        merge(other->forest);
+        insertForest(other->extractForest());
     }
 
 protected:
@@ -40,5 +40,6 @@ protected:
     Node*   forest = nullptr;
 
 private:
-    virtual void merge(Node* otherForest) = 0;
+    virtual Node* extractForest() = 0;
+    virtual void insertForest(Node* otherForest) = 0;
 };

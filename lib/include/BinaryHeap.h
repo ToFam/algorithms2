@@ -43,7 +43,7 @@ public:
         return filled;
 	}
 
-    virtual PQElement<T> min()
+    virtual PQElement<T> min() const
 	{
         return filled > 0 ? data[0] : PQElement<T>();
 	}

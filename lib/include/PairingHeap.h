@@ -36,21 +36,54 @@ public:
         return numElements;
     }
 
-    PQElement<T> min()
+    PQElement<T> min() const
     {
         return pMin ? pMin->data : PQElement<T>();
     }
 
     PQElement<T> deleteMin()
     {
+        if (pMin != nullptr)
+            return remove(pMin);
+        return PQElement<T>();
+    }
+
+    PQElement<T> remove(T handle)
+    {
+        Node* e = find(handle, this->forest);
+        if (e == nullptr)
+            return PQElement<T>();
+
+        return remove(e);
+    }
+
+    void decreaseKey(T handle, int key)
+    {
+        Node* n = find(handle, this->forest);
+
+        if (n->data.key > key)
+        {
+            n->data.key = key;
+            cut(n);
+        }
+    }
+
+private:
+    typedef typename AdressablePQ<T>::Node Node;
+    Node*   pMin = nullptr;
+    size_t  numElements = 0;
+
+private:
+    PQElement<T> remove(Node* n)
+    {
         if (numElements > 0)
             numElements--;
         else
             return PQElement<T>();
 
-        PQElement<T> e = pMin->data;
+        PQElement<T> e = n->data;
 
-        if (this->forest == pMin)
+        if (this->forest == n)
         {
             if (this->forest->right != this->forest)
             {
@@ -60,73 +93,109 @@ public:
             }
             else
             {
-                if (pMin->child == nullptr)
+                if (n->child == nullptr)
                 {
-                    delete pMin;
+                    delete n;
                     this->forest = nullptr;
                     pMin = nullptr;
                     return e;
                 }
                 else
                 {
-                    this->forest = pMin->child;
-                    delete pMin;
+                    this->forest = n->child;
+                    delete n;
                     pMin = this->forest;
-                    makeTopLevel(this->forest);
+                    makeTopLevel();
                     topUnion();
-                    makeTopLevel(this->forest);
+                    updateMin();
                     return e;
                 }
             }
         }
         else
         {
-            pMin->left->right = pMin->right;
-            pMin->right->left = pMin->left;
+            n->left->right = n->right;
+            n->right->left = n->left;
         }
 
-        if (pMin->child != nullptr)
+        if (n->child != nullptr)
         {
-            Node* left = pMin->child;
-            Node* right = pMin->child->left;
-
-            right->right = this->forest;
-            left->left = this->forest->left;
-
-            this->forest->left->right = left;
-            this->forest->left = right;
+            cutChildren(n);
         }
 
-        delete pMin;
-        pMin = this->forest;
-        makeTopLevel(this->forest);
+        delete n;
+        makeTopLevel();
         topUnion();
-        makeTopLevel(this->forest);
+        updateMin();
 
         return e;
     }
 
-    T remove(T handle)
+    void cutChildren(Node* n)
     {
-        return T();
+        Node* left = n->child;
+        Node* right = n->child->left;
+
+        right->right = this->forest;
+        left->left = this->forest->left;
+
+        this->forest->left->right = left;
+        this->forest->left = right;
     }
 
-    void decreaseKey(T handle, int key)
+    Node* find(T handle, Node* start) const
     {
+        Node* it = start;
+        do
+        {
+            if (it->data.value == handle)
+                return it;
 
+            if (it->child != nullptr)
+            {
+                Node* rtn = find(handle, it->child);
+                if (rtn != nullptr)
+                    return rtn;
+            }
+
+            it = it->right;
+        } while (it != start);
+        return nullptr;
     }
 
-private:
-    typedef typename AdressablePQ<T>::Node Node;
-    Node*   pMin = nullptr;
-    size_t  numElements = 0;
-
-private:
-    void makeTopLevel(Node* it)
+    int count(Node* start) const
     {
+        int counter = 0;
+        Node* it = start;
+        do
+        {
+            counter++;
+            if (it->child != nullptr)
+            {
+                counter += count(it->child);
+            }
+
+            it = it->right;
+        } while (it != start);
+        return counter;
+    }
+
+    void makeTopLevel()
+    {
+        Node* it = this->forest;
         do
         {
             it->parent = nullptr;
+            it = it->right;
+        }while (it != this->forest);
+    }
+
+    void updateMin()
+    {
+        Node* it = this->forest;
+        pMin = this->forest;
+        do
+        {
             if (pMin->data.key > it->data.key)
                 pMin = it;
             it = it->right;
@@ -167,7 +236,11 @@ private:
         b->left->right = b->right;
         b->right->left = b->left;
         if (a->child == nullptr)
+        {
             a->child = b;
+            b->left = b;
+            b->right = b;
+        }
         else
         {
             b->left = a->child->left;
@@ -198,8 +271,36 @@ private:
         this->forest->left = a;
     }
 
-    void merge(Node* otherForest)
+    Node* extractForest()
     {
+        Node* rtn = this->forest;
+        this->forest = nullptr;
+        pMin = nullptr;
+        numElements = 0;
+        return rtn;
+    }
 
+    void insertForest(Node* otherForest)
+    {
+        if (otherForest == nullptr)
+            return;
+
+        numElements += count(otherForest);
+
+        if (this->forest == nullptr)
+        {
+            this->forest = otherForest;
+        }
+        else
+        {
+            otherForest->left->right = this->forest;
+            this->forest->left->right = otherForest;
+
+            this->forest->left = otherForest->left;
+            otherForest->left = this->forest;
+
+            topUnion();
+        }
+        updateMin();
     }
 };

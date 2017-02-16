@@ -103,7 +103,29 @@ TYPED_TEST_P(PQTest, testDel)
     ASSERT_EQ(0, this->pq->size());
 }
 
-REGISTER_TYPED_TEST_CASE_P(PQTest, testEmpty, testAdd, testMin, testDel);
+TYPED_TEST_P(PQTest, testSameKey)
+{
+    this->pq->insert({0, 0});
+    this->pq->insert({1, 0});
+    this->pq->insert({2, 0});
+    this->pq->insert({4, 4});
+    this->pq->insert({3, 3});
+
+    ASSERT_EQ(5, this->pq->size());
+
+    PQElement<int> e = this->pq->deleteMin();
+
+    ASSERT_GT(3, e.value);
+
+    ASSERT_GT(3, this->pq->min().value);
+
+    this->pq->deleteMin();
+    this->pq->deleteMin();
+
+    ASSERT_LT(2, this->pq->min().value);
+}
+
+REGISTER_TYPED_TEST_CASE_P(PQTest, testEmpty, testAdd, testMin, testDel, testSameKey);
 
 typedef ::testing::Types<BinaryHeap<int>, PairingHeap<int>> pqTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Bla, PQTest, pqTypes);
